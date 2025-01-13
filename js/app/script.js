@@ -1,7 +1,7 @@
 let weights = []
 
-const minWeightChangeThreshold = 2.55; // Minimal weight change to stop training
-let alfa = 0.002;
+const minWeightChangeThreshold = 2.5; // Minimal weight change to stop training
+let alfa = 0.001;
 let teta = 0.23;
 
 let dataForTrain = []
@@ -181,22 +181,20 @@ doneTrainBtn.addEventListener("click", () => {
         }
         b = [Math.random() * 0.5, Math.random() * 0.5];
 
-
-        for (let j = 0; j < 2; j++) {
-            training = true;
+        while (training) {
             let totalWeightChange = 0; // Accumulate all weight changes for this epoch
-            while (training) {
-                totalWeightChange = 0; // Accumulate all weight changes for this epoch
-
-                for (let item of dataForTrain) {
-                    yNetInput = 0;
-                    index = 0;
+        
+            for (let item of dataForTrain) {
+                for (let j = 0; j < 2; j++) {
+                    let yNetInput = 0;
+                    let index = 0;
                     for (let x of item.data) {
                         yNetInput += weights[index][j] * x;
                         index++;
                     }
                     yNetInput += b[j];
-
+        
+                    let ykoll;
                     if (yNetInput > teta) {
                         ykoll = 1;
                     } else if (yNetInput <= teta && yNetInput >= -teta) {
@@ -204,7 +202,7 @@ doneTrainBtn.addEventListener("click", () => {
                     } else {
                         ykoll = -1;
                     }
-
+        
                     if (ykoll != item.y[j]) {
                         let i = 0;
                         item.data.forEach((x) => {
@@ -218,13 +216,17 @@ doneTrainBtn.addEventListener("click", () => {
                         totalWeightChange += Math.abs(deltaBias); // Include bias change in the total
                     }
                 }
-                console.log(totalWeightChange);
-                if (totalWeightChange < minWeightChangeThreshold) { // اگر هیچ تغییر وزنی نداشتیم، از حلقه خارج می‌شویم
-                    training = false;
-                }
-                epoch++;
             }
+        
+            console.log(totalWeightChange);
+        
+            // Check for convergence
+            if (totalWeightChange < minWeightChangeThreshold) { 
+                training = false;
+            }
+            epoch++;
         }
+        
 
         console.log("finished at", epoch, "epoches");
 
